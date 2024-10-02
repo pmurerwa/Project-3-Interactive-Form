@@ -59,6 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
             totalCost -= activityCost;
         }
         activitiesCostDisplay.textContent = `Total: $${totalCost}`;
+
+        
         //Exceeds expectations #1
         // Conflict management: Disable conflicting activities
         const clickedTime = event.target.getAttribute('data-day-and-time');
@@ -67,11 +69,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // If the checkbox has the same time as the clicked activity and it's not the clicked one
             if (activityTime === clickedTime && checkbox !== event.target) {
                 if (event.target.checked) {
-                    checkbox.disabled = true;
+                    checkbox.disabled = event.target.checked;
                     checkbox.parentElement.classList.add('disabled');
                 } else {
                     checkbox.disabled = false;
-                    checkbox.parentElement.classList.remove('disabled');
+                    checkbox.parentElement.classList.toggle('disabled', event.target.checked);
                 }
             }
         });
@@ -102,12 +104,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     //7. Custom form validation including error checks from #9:
     
-    nameInput.addEventListener('keyup', () => {
+    nameInput.addEventListener('blur', () => {
         isValidName();  // Real-Time Validation for Name Field
     });
 
     const emailInput = document.getElementById('email');
-    emailInput.addEventListener('keyup', () => {
+    emailInput.addEventListener('blur', () => {
         isValidEmail();  // Real-Time Validation for Email Field
     });
 
@@ -116,28 +118,12 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', (event) => {
         let valid = true;
 
-        if (!isValidName()) {
-            valid = false;
-            // Show error for name
-        }
-        if (!isValidEmail()) {
-            valid = false;
-            // Show error for email
-        }
-        if (!isActivitySelected()) {
-            valid = false;
-            // Show error for activities
-        }
-
-        if (paymentSelect.value === 'credit-card') {
-            if (!isValidCardNumber() || !isValidZip() || !isValidCVV()) {
-                valid = false;
-                // Show error for credit card details
-            }
-        }
-        if (!valid) {
-            event.preventDefault();
-        }
+        if (!isValidName()) valid = false; // Show error for name
+        if (!isValidEmail()) valid = false; // Show error for email
+        if (!isActivitySelected()) valid = false; // Show error for activities
+        if (paymentSelect.value === 'credit-card' && (!isValidCardNumber() || !isValidZip() || !isValidCVV())) valid = false; // Show error for credit card details
+            
+        if (!valid) event.preventDefault();
     });
     
     // Validation Helper Functions with error messages
@@ -175,15 +161,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 isSelected = true;
             }
         });
-
+    
         if (!isSelected) {
-            showValidationError(fieldset, 'Please select at least one activity.');
+            showValidationError(fieldset, 'Please select at least one activity.');  // Apply to fieldset
             return false;
         } else {
-            showValidationSuccess(fieldset);
+            showValidationSuccess(fieldset);  // Apply to fieldset
             return true;
         }
     }
+    
 
     function isValidCardNumber() {
         const ccInput = document.getElementById('cc-num');
@@ -219,7 +206,6 @@ document.addEventListener('DOMContentLoaded', () => {
             return true;
         }
     }
-    
 
 
     //8. Add focus and blur events for activities checkboxes:
@@ -232,7 +218,6 @@ document.addEventListener('DOMContentLoaded', () => {
             event.target.parentNode.classList.remove('focus');
         });
     }
-    
 
     //9.a Show Error for Invalid Fields:
 
@@ -241,6 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
         parent.classList.add('not-valid');
         parent.classList.remove('valid');
         parent.querySelector('.hint').style.display = 'block';
+        element.style.borderColor = 'red';  // Add red outline
     }
     //9.b Show Success for Valid Fields:
 
@@ -249,5 +235,6 @@ document.addEventListener('DOMContentLoaded', () => {
         parent.classList.add('valid');
         parent.classList.remove('not-valid');
         parent.querySelector('.hint').style.display = 'none';
+        element.style.borderColor = '';  // Remove red outline
     }
 });
